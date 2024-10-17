@@ -4,6 +4,9 @@ import { AbortController } from 'abort-controller';
 import { createServer, IncomingMessage, ServerResponse } from 'node:http';
 import type {HeadersInit} from "node-fetch";
 import process from "node:process";
+import { LogManager } from './utils/logger.ts';
+
+const logger = new LogManager('error', 'VRC-Proxy');
 
 const readme = "https://github.com/vrspace/vrspace-vrc-proxy";
 const authors = "LyzCoote";
@@ -13,16 +16,15 @@ For more information, visit ${readme}.`;
 
 // Create an HTTP server
 const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
-    console.log("Received a request");
+    logger.info(`Request received: ${req.method} ${req.url}`);
 
     // Construct the original URL from the request headers
     const originalUrl = `http://${req.headers.host}${req.url}`;
-    console.log(`Original URL: ${originalUrl}`);
     const url = new URL(originalUrl);
 
     // If the root path is accessed, return API information
     if (url.pathname === "/") {
-        console.log("Root path accessed, returning API information");
+        logger.info("Root path accessed, returning API information");
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             _readme: notice,
@@ -33,7 +35,6 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
     }
 
     // Modify the URL to target the VRChat API
-    console.log("Modifying URL to target VRChat API");
     url.host = "api.vrchat.cloud";
     url.port = "443";
     url.protocol = "https";
@@ -45,13 +46,12 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 
     // Copy request headers and remove the 'referer' header
     const headers = { ...req.headers };
-    console.log(typeof headers)
-    console.log("Request headers:", headers);
+    console.debug("Request headers:", headers);
     delete headers['referer'];
 
     // Only allow GET requests
     if (req.method?.toLowerCase() !== "get") {
-        console.log("Non-GET request received, returning 405 Method Not Allowed");
+        logger.warn("Non-GET request received, returning 405 Method Not Allowed");
         res.writeHead(405, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             _readme: notice,
@@ -67,7 +67,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 
     // Reject requests from Postman
     if (headers['user-agent']?.includes("PostmanRuntime")) {
-        console.log("Request from Postman detected, returning 400 Bad Request");
+        logger.warn("Request from Postman detected, returning 400 Bad Request");
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             _readme: notice,
@@ -83,7 +83,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 
     // Reject requests with credentials
     if (headers['authorization'] || headers['cookie']) {
-        console.log("Request with credentials detected, returning 400 Bad Request");
+        logger.warn("Request with credentials detected, returning 400 Bad Request");
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             _readme: notice,
@@ -99,7 +99,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 
     try {
         // Fetch the modified URL
-        console.log(`Fetching URL: ${url.toString()}`);
+        console.debug(`Fetching URL: ${url.toString()}`);
         const response = await fetch(url.toString(), {
             method: req.method,
             headers: new Headers(headers as HeadersInit),
@@ -108,11 +108,11 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 
         // Read the response body
         let body = await response.text();
-        console.log("Response received from VRChat API");
+        console.debug("Response received from VRChat API");
 
         // If the response is JSON, add the notice comment
         if (response.headers.get("content-type")?.startsWith("application/json")) {
-            console.log("Response is JSON, adding notice comment");
+            console.debug("Response is JSON, adding notice comment");
             const json = { _readme: notice, _authors: authors, ...JSON.parse(body) };
             body = JSON.stringify(json, null, 2);
         }
@@ -125,9 +125,9 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
         res.end(body);
     } catch (error: any) {
         // Handle errors
-        console.log(`Error occurred: ${error.message}`);
+        logger.error({message:"Error occurred", stack: error.message});
         if (error.name === 'AbortError') {
-            console.log("Request timed out, returning 504 Gateway Timeout");
+            logger.fatal("Request timed out, returning 504 Gateway Timeout");
             res.writeHead(504, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 _readme: notice,
@@ -138,7 +138,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
                 }
             }));
         } else {
-            console.log("Internal server error, returning 500 Internal Server Error");
+            logger.fatal("Internal server error, returning 500 Internal Server Error");
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 _readme: notice,
@@ -155,5 +155,5 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 // Start the server on the specified port
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    logger.info(`Server is running on port ${PORT}`);
 });
