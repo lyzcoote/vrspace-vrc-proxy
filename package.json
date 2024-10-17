@@ -10,11 +10,10 @@
   "dependencies": {
     "@types/node": "^22.7.6",
     "abort-controller": "^3.0.0",
+    "date-fns": "^4.1.0",
     "node-fetch": "^3.3.2"
   },
-  "devDependencies": {
-    "typescript": "^5.6.3"
-  },
+  "devDependencies": { "typescript": "^5.6.3" },
   "author": "LyzCoote",
   "license": "MIT",
   "repository": {
