@@ -15,49 +15,6 @@ const notice = `This is a readonly proxy for the VRChat API.
 It is not affiliated with VRChat or VRChat Inc. Software written & distributed by vrspace.social. 
 For more information, visit ${readme}.`;
 
-const programmingJokes = {
-    jokes: [
-      "Day nine. Starting to seriously wonder why the server door locks from the outside and not the inside.",
-      "Ten thousand wrong decisions and about seven very right ones.",
-      "Space, the final frontier.",
-      "Finding a new way to break prod every week, rain or shine.",
-      "... uh, wait, I just realized that this was a pull door, not a push door. I'm free, free as a bird! Ha ha.",
-      "Yo Mama.",
-      "Dermot Mulroney or Dylan McDermott.",
-      "shouting.",
-      "CobolOnWheelchair/04924f9.",
-      "The letter E.",
-      "A Kubernetes grid made entirely out of decommissioned Texas Instruments calculators.",
-      "Deep Thought.",
-      ":D",
-      "Three raccoons in a trench coat.",
-      "A thirty-six year old man who, honestly, should know better by now.",
-      "Day five. I am more server than man, now. Well, that's not true. I need food badly.",
-      "Outrage.",
-      "Bananas.",
-      "A spare desktop workstation hidden in a shack somewhere in New Zealand.",
-      "I can see it in your eyes.",
-      "PHP/0.1.3-b1.",
-      "On this edition of our podcast we talk about the uncertainty of all things, the future, the past, and why Joff has been forbidden from cooking in the staff kitchen.",
-      "Five nines of reliability: we are up 50.99999% of the time.",
-      "VENTURE CAPITAL, and don’t you forget it.",
-      "RaspberryPi.",
-      "80% post-consumer recycled materials.",
-      "Anime.",
-      "Teletext.",
-      "Everybody clapping their hands and believing.",
-      "the gay agenda/dayplanner.",
-      "Day ten. I think that's against most fire codes."
-    ]
-  };
-  
-
-  const joke = function() {
-    const randomIndex = Math.floor(Math.random() * programmingJokes.jokes.length);
-    return programmingJokes.jokes[randomIndex];
-  }
-  
-
 // Create an HTTP server
 const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
     console.log("Received a request");
@@ -74,7 +31,6 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
         res.end(JSON.stringify({
             _readme: notice,
             _authors: authors,
-            _comment: joke(),
             example: `${url.origin}/1/config`
         }));
         return;
@@ -104,7 +60,6 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
         res.end(JSON.stringify({
             _readme: notice,
             _authors: authors,
-            _comment: joke(),
             error: {
                 _comment: "Only GET requests are allowed.",
                 message: "Method Not Allowed",
@@ -121,7 +76,6 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
         res.end(JSON.stringify({
             _readme: notice,
             _authors: authors,
-            _comment: joke(),
             error: {
                 _comment: "Requests with current user-agent will always fail.",
                 message: "Bad Request",
@@ -138,7 +92,6 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
         res.end(JSON.stringify({
             _readme: notice,
             _authors: authors,
-            _comment: joke(),
             error: {
                 _comment: "Requests with credentials are not allowed.",
                 message: "Bad Request",
@@ -164,7 +117,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
         // If the response is JSON, add the notice comment
         if (response.headers.get("content-type")?.startsWith("application/json")) {
             console.log("Response is JSON, adding notice comment");
-            const json = { _readme: notice, _authors: authors, _comment: joke(), vrc: {...JSON.parse(body)} };
+            const json = { _readme: notice, _authors: authors, ...JSON.parse(body) };
             body = JSON.stringify(json, null, 2);
         }
 
@@ -182,7 +135,6 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
             res.writeHead(504, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 _readme: notice,
-                _comment: joke(),
                 error: {
                     _comment: "The request timed out.",
                     message: "Gateway Timeout",
@@ -194,7 +146,6 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 _readme: notice,
-                _comment: joke(),
                 error: {
                     _comment: "An internal server error occurred.",
                     message: "Internal Server Error",
