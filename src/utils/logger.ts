@@ -12,7 +12,7 @@ const dateStamp: string = format(dateNow, "yyyy-MM-dd H-mm-ss");
  */
 export class LogManager {
     logger: WriteStream | null;
-    debugType: string;
+    debugType: boolean;
     logDir: string;
     logFilePath: string;
     logFileName: string;
@@ -23,7 +23,7 @@ export class LogManager {
      * @param debugType - The debug type for logging.
      * @param logApp - The log application name.
      */
-    constructor(debugType: string, logApp?: string) {
+    constructor(debugType: boolean, logApp: string) {
         this.logger = null;
         this.debugType = debugType;
         this.logDir = '';
@@ -197,8 +197,3 @@ export class LogManager {
         return this.logDir;
     }
 }
-
-const logManager = new LogManager('DEBUG');
-process.on('exit', () => {
-    logManager.closeFile();
-});
