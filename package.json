@@ -1,14 +1,18 @@
 {
-  "name": "${PROJECT_NAME}",
+  "name": "vrspace-vrc-proxy",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "scripts": {
     "build": "tsc"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/node": "^22.7.6",
+    "abort-controller": "^3.0.0",
+    "node-fetch": "^3.3.2"
+  },
   "devDependencies": {
-    "typescript": "^5.5.3"
+    "typescript": "^5.6.3"
   },
   "private": true
 }
