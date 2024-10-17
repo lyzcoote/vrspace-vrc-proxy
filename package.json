@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "deno run --allow-net --allow-env src/index.ts"
   },
   "dependencies": {
     "@types/node": "^22.7.6",
