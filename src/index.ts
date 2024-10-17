@@ -6,7 +6,7 @@ import type {HeadersInit} from "node-fetch";
 import process from "node:process";
 import { LogManager } from './utils/logger.ts';
 
-const logger = new LogManager('error', 'VRC-Proxy');
+const logger = new LogManager(true, 'VRC-Proxy');
 
 const readme = "https://github.com/vrspace/vrspace-vrc-proxy";
 const authors = "LyzCoote";
@@ -16,7 +16,7 @@ For more information, visit ${readme}.`;
 
 // Create an HTTP server
 const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
-    logger.info(`Request received: ${req.method} ${req.url}`);
+    logger.debug(`Request received: ${req.method} ${req.url}`);
 
     // Construct the original URL from the request headers
     const originalUrl = `http://${req.headers.host}${req.url}`;
@@ -46,7 +46,8 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 
     // Copy request headers and remove the 'referer' header
     const headers = { ...req.headers };
-    console.debug("Request headers:", headers);
+    logger.debug("Request headers:");
+    logger.debug(headers);
     delete headers['referer'];
 
     // Only allow GET requests
@@ -99,7 +100,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 
     try {
         // Fetch the modified URL
-        console.debug(`Fetching URL: ${url.toString()}`);
+        logger.debug(`Fetching URL: ${url.toString()}`);
         const response = await fetch(url.toString(), {
             method: req.method,
             headers: new Headers(headers as HeadersInit),
@@ -108,11 +109,11 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
 
         // Read the response body
         let body = await response.text();
-        console.debug("Response received from VRChat API");
+        logger.debug("Response received from VRChat API");
 
         // If the response is JSON, add the notice comment
         if (response.headers.get("content-type")?.startsWith("application/json")) {
-            console.debug("Response is JSON, adding notice comment");
+            logger.debug("Response is JSON, adding notice comment");
             const json = { _readme: notice, _authors: authors, ...JSON.parse(body) };
             body = JSON.stringify(json, null, 2);
         }
@@ -123,6 +124,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
             'Content-Type': response.headers.get('content-type') || 'text/plain'
         });
         res.end(body);
+        logger.success(`Response sent: ${response.status} ${response.statusText}`);
     } catch (error: any) {
         // Handle errors
         logger.error({message:"Error occurred", stack: error.message});
