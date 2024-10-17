@@ -5,12 +5,8 @@ import { createServer, IncomingMessage, ServerResponse } from 'node:http';
 import type {HeadersInit} from "node-fetch";
 import process from "node:process";
 
-// URL to the project's README
 const readme = "https://github.com/vrspace/vrspace-vrc-proxy";
-
 const authors = "LyzCoote";
-
-// Notice message to be included in responses
 const notice = `This is a readonly proxy for the VRChat API. 
 It is not affiliated with VRChat or VRChat Inc. Software written & distributed by vrspace.social. 
 For more information, visit ${readme}.`;
