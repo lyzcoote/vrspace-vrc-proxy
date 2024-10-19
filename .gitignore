@@ -15,3 +15,4 @@ yarn-error.log*
 .idea/*
 deno.lock
 logs/
+.idea/vcs.xml
