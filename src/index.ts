@@ -145,7 +145,7 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse) =>
             res.end(JSON.stringify({
                 _readme: notice,
                 error: {
-                    _comment: "An internal server error occurred.",
+                    _comment: error.message,
                     message: "Internal Server Error",
                     status_code: 500
                 }
